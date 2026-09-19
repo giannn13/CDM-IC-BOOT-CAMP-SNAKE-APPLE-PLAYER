@@ -1,10 +1,10 @@
 
 # Tiny Tapeout project information
 project:
-  title:        "Snake apple"      # Project title
-  author:       "Gian Mustar"      # Your name
-  discord:      "I dont have"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "game"      # One line description of what your project does
+  title:        ""      # Project title
+  author:       ""      # Your name
+  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
+  description:  ""      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     25175000       # Clock frequency in Hz (or 0 if not applicable)
 
@@ -27,9 +27,9 @@ pinout:
   ui[1]: ""
   ui[2]: ""
   ui[3]: ""
-  ui[4]: "Gamepad Latch"
-  ui[5]: "Gamepad Clock"
-  ui[6]: "Gamepad Data"
+  ui[4]: ""
+  ui[5]: ""
+  ui[6]: ""
   ui[7]: ""
 
   # Outputs
