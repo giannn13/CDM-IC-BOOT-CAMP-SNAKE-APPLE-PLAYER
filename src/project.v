@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 Uri Shaked, Modified 2026
- * Playable Snake Apple Game (Fixed Edge Duplication Bug)
+ * Playable Snake Apple Game (Yosys Syntax Safe & Edge Fixed)
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -252,19 +252,151 @@ module tt_um_vga_example (
     else            lfsr_reg <= {lfsr_reg[14:0], feedback};
   end
 
-  // ----------------- GLYPHS & GAMEPAD HUD (Bottom) --------------------
-  localparam [7:0] LEFT_GLYPH[0:7] = '{ 8'b00010000, 8'b00110000, 8'b01110000, 8'b11111111, 8'b01110000, 8'b00110000, 8'b00010000, 8'b00000000 };
-  localparam [7:0] RIGHT_GLYPH[0:7] = '{ 8'b00001000, 8'b00001100, 8'b00001110, 8'b11111111, 8'b00001110, 8'b00001100, 8'b00001000, 8'b00000000 };
-  localparam [7:0] UP_GLYPH[0:7] = '{ 8'b00010000, 8'b00111000, 8'b01111100, 8'b11111110, 8'b00010000, 8'b00010000, 8'b00010000, 8'b00010000 };
-  localparam [7:0] DOWN_GLYPH[0:7] = '{ 8'b00010000, 8'b00010000, 8'b00010000, 8'b00010000, 8'b11111110, 8'b01111100, 8'b00111000, 8'b00010000 };
-  localparam [7:0] A_GLYPH[0:7] = '{ 8'b00111100, 8'b01100110, 8'b01100110, 8'b01111110, 8'b01100110, 8'b01100110, 8'b01100110, 8'b00000000 };
-  localparam [7:0] B_GLYPH[0:7] = '{ 8'b01111100, 8'b01100110, 8'b01100110, 8'b01111100, 8'b01100110, 8'b01100110, 8'b01111100, 8'b00000000 };
-  localparam [7:0] X_GLYPH[0:7] = '{ 8'b11000011, 8'b01100110, 8'b00111100, 8'b00011000, 8'b00011000, 8'b00111100, 8'b01100110, 8'b11000011 };
-  localparam [7:0] Y_GLYPH[0:7] = '{ 8'b11000011, 8'b01100110, 8'b00111100, 8'b00011000, 8'b00011000, 8'b00011000, 8'b00011000, 8'b00011000 };
-  localparam [7:0] L_GLYPH[0:7] = '{ 8'b11100000, 8'b11100000, 8'b11100000, 8'b11100000, 8'b11100000, 8'b11111110, 8'b11111110, 8'b00000000 };
-  localparam [7:0] R_GLYPH[0:7] = '{ 8'b11111100, 8'b11100110, 8'b11100110, 8'b11111100, 8'b11111000, 8'b11111100, 8'b11101110, 8'b00000000 };
-  localparam [7:0] SELECT_GLYPH[0:7] = '{ 8'b00011000, 8'b00100100, 8'b01000010, 8'b10000001, 8'b10000001, 8'b01000010, 8'b00100100, 8'b00011000 };
-  localparam [7:0] START_GLYPH[0:7] = '{ 8'b00011000, 8'b01011010, 8'b10011001, 8'b10011001, 8'b10011001, 8'b10000001, 8'b01000010, 8'b00111100 };
+  // ----------------- SYNTHESIS-SAFE GLYPH LOOKUP FUNCTION --------------------
+  function [7:0] get_glyph_row;
+    input [3:0] g_type;
+    input [2:0] row;
+    begin
+      case (g_type)
+        4'd0: // LEFT
+          case(row)
+            3'd0: get_glyph_row = 8'b00010000;
+            3'd1: get_glyph_row = 8'b00110000;
+            3'd2: get_glyph_row = 8'b01110000;
+            3'd3: get_glyph_row = 8'b11111111;
+            3'd4: get_glyph_row = 8'b01110000;
+            3'd5: get_glyph_row = 8'b00110000;
+            3'd6: get_glyph_row = 8'b00010000;
+            default: get_glyph_row = 8'b00000000;
+          endcase
+        4'd1: // RIGHT
+          case(row)
+            3'd0: get_glyph_row = 8'b00001000;
+            3'd1: get_glyph_row = 8'b00001100;
+            3'd2: get_glyph_row = 8'b00001110;
+            3'd3: get_glyph_row = 8'b11111111;
+            3'd4: get_glyph_row = 8'b00001110;
+            3'd5: get_glyph_row = 8'b00001100;
+            3'd6: get_glyph_row = 8'b00001000;
+            default: get_glyph_row = 8'b00000000;
+          endcase
+        4'd2: // UP
+          case(row)
+            3'd0: get_glyph_row = 8'b00010000;
+            3'd1: get_glyph_row = 8'b00111000;
+            3'd2: get_glyph_row = 8'b01111100;
+            3'd3: get_glyph_row = 8'b11111110;
+            3'd4: get_glyph_row = 8'b00010000;
+            3'd5: get_glyph_row = 8'b00010000;
+            3'd6: get_glyph_row = 8'b00010000;
+            default: get_glyph_row = 8'b00000000;
+          endcase
+        4'd3: // DOWN
+          case(row)
+            3'd0: get_glyph_row = 8'b00010000;
+            3'd1: get_glyph_row = 8'b00010000;
+            3'd2: get_glyph_row = 8'b00010000;
+            3'd3: get_glyph_row = 8'b00010000;
+            3'd4: get_glyph_row = 8'b11111110;
+            3'd5: get_glyph_row = 8'b01111100;
+            3'd6: get_glyph_row = 8'b00111000;
+            default: get_glyph_row = 8'b00000000;
+          endcase
+        4'd4: // A
+          case(row)
+            3'd0: get_glyph_row = 8'h3c;
+            3'd1: get_glyph_row = 8'h66;
+            3'd2: get_glyph_row = 8'h66;
+            3'd3: get_glyph_row = 8'h7e;
+            3'd4: get_glyph_row = 8'h66;
+            3'd5: get_glyph_row = 8'h66;
+            3'd6: get_glyph_row = 8'h66;
+            default: get_glyph_row = 8'h00;
+          endcase
+        4'd5: // B
+          case(row)
+            3'd0: get_glyph_row = 8'h7c;
+            3'd1: get_glyph_row = 8'h66;
+            3'd2: get_glyph_row = 8'h66;
+            3'd3: get_glyph_row = 8'h7c;
+            3'd4: get_glyph_row = 8'h66;
+            3'd5: get_glyph_row = 8'h66;
+            3'd6: get_glyph_row = 8'h7c;
+            default: get_glyph_row = 8'h00;
+          endcase
+        4'd6: // X
+          case(row)
+            3'd0: get_glyph_row = 8'hc3;
+            3'd1: get_glyph_row = 8'h66;
+            3'd2: get_glyph_row = 8'h3c;
+            3'd3: get_glyph_row = 8'h18;
+            3'd4: get_glyph_row = 8'h18;
+            3'd5: get_glyph_row = 8'h3c;
+            3'd6: get_glyph_row = 8'h66;
+            3'd7: get_glyph_row = 8'hc3;
+            default: get_glyph_row = 8'h00;
+          endcase
+        4'd7: // Y
+          case(row)
+            3'd0: get_glyph_row = 8'hc3;
+            3'd1: get_glyph_row = 8'h66;
+            3'd2: get_glyph_row = 8'h3c;
+            3'd3: get_glyph_row = 8'h18;
+            3'd4: get_glyph_row = 8'h18;
+            3'd5: get_glyph_row = 8'h18;
+            3'd6: get_glyph_row = 8'h18;
+            default: get_glyph_row = 8'h00;
+          endcase
+        4'd8: // L
+          case(row)
+            3'd0: get_glyph_row = 8'he0;
+            3'd1: get_glyph_row = 8'he0;
+            3'd2: get_glyph_row = 8'he0;
+            3'd3: get_glyph_row = 8'he0;
+            3'd4: get_glyph_row = 8'he0;
+            3'd5: get_glyph_row = 8'hfe;
+            3'd6: get_glyph_row = 8'hfe;
+            default: get_glyph_row = 8'h00;
+          endcase
+        4'd9: // R
+          case(row)
+            3'd0: get_glyph_row = 8'hfc;
+            3'd1: get_glyph_row = 8'h66;
+            3'd2: get_glyph_row = 8'h66;
+            3'd3: get_glyph_row = 8'hfc;
+            3'd4: get_glyph_row = 8'hf8;
+            3'd5: get_glyph_row = 8'hfc;
+            3'd6: get_glyph_row = 8'hee;
+            default: get_glyph_row = 8'h00;
+          endcase
+        4'd10: // SELECT
+          case(row)
+            3'd0: get_glyph_row = 8'h18;
+            3'd1: get_glyph_row = 8'h24;
+            3'd2: get_glyph_row = 8'h42;
+            3'd3: get_glyph_row = 8'h81;
+            3'd4: get_glyph_row = 8'h81;
+            3'd5: get_glyph_row = 8'h42;
+            3'd6: get_glyph_row = 8'h24;
+            3'd7: get_glyph_row = 8'h18;
+            default: get_glyph_row = 8'h00;
+          endcase
+        4'd11: // START
+          case(row)
+            3'd0: get_glyph_row = 8'h18;
+            3'd1: get_glyph_row = 8'h5a;
+            3'd2: get_glyph_row = 8'h99;
+            3'd3: get_glyph_row = 8'h99;
+            3'd4: get_glyph_row = 8'h99;
+            3'd5: get_glyph_row = 8'h81;
+            3'd6: get_glyph_row = 8'h42;
+            3'd7: get_glyph_row = 8'h3c;
+            default: get_glyph_row = 8'h00;
+          endcase
+        default: get_glyph_row = 8'h00;
+      endcase
+    end
+  endfunction
 
   // HUD Glyph Coordinates
   localparam LEFT_X = 48, LEFT_Y = 380;
@@ -280,18 +412,18 @@ module tt_um_vga_example (
   localparam SEL_X = 264, SEL_Y = 380;
   localparam STRT_X = 328, STRT_Y = 380;
 
-  wire left_act = glyph_active(LEFT_X, LEFT_Y, LEFT_GLYPH);
-  wire right_act = glyph_active(RIGHT_X, RIGHT_Y, RIGHT_GLYPH);
-  wire up_act = glyph_active(UP_X, UP_Y, UP_GLYPH);
-  wire down_act = glyph_active(DOWN_X, DOWN_Y, DOWN_GLYPH);
-  wire a_act = glyph_active(A_X, A_Y, A_GLYPH);
-  wire b_act = glyph_active(B_X, B_Y, B_GLYPH);
-  wire x_act = glyph_active(X_X, X_Y, X_GLYPH);
-  wire y_act = glyph_active(Y_X, Y_Y, Y_GLYPH);
-  wire l_act = glyph_active(L_X, L_Y, L_GLYPH);
-  wire r_act = glyph_active(R_X, R_Y, R_GLYPH);
-  wire sel_act = glyph_active(SEL_X, SEL_Y, SELECT_GLYPH);
-  wire strt_act = glyph_active(STRT_X, STRT_Y, START_GLYPH);
+  wire left_act  = glyph_active(LEFT_X, LEFT_Y, 4'd0);
+  wire right_act = glyph_active(RIGHT_X, RIGHT_Y, 4'd1);
+  wire up_act    = glyph_active(UP_X, UP_Y, 4'd2);
+  wire down_act  = glyph_active(DOWN_X, DOWN_Y, 4'd3);
+  wire a_act     = glyph_active(A_X, A_Y, 4'd4);
+  wire b_act     = glyph_active(B_X, B_Y, 4'd5);
+  wire x_act     = glyph_active(X_X, X_Y, 4'd6);
+  wire y_act     = glyph_active(Y_X, Y_Y, 4'd7);
+  wire l_act     = glyph_active(L_X, L_Y, 4'd8);
+  wire r_act     = glyph_active(R_X, R_Y, 4'd9);
+  wire sel_act   = glyph_active(SEL_X, SEL_Y, 4'd10);
+  wire strt_act  = glyph_active(STRT_X, STRT_Y, 4'd11);
 
   wire hud_glyph_lit = (left_act & inp_left) | (right_act & inp_right) | 
                        (up_act & inp_up) | (down_act & inp_down) |
@@ -333,18 +465,18 @@ module tt_um_vga_example (
     end
   end
 
-  // Scaled glyph helper function (2x size)
+  // Scaled glyph helper function
   function glyph_active;
     input [9:0] x0, y0;
-    input [7:0] glyph[0:7];
+    input [3:0] g_type;
     reg [9:0] x_rel, y_rel;
-    reg [7:0] row;
+    reg [7:0] row_bits;
     begin
       if ((pix_x >= x0) && (pix_x < x0 + 16) && (pix_y >= y0) && (pix_y < y0 + 16)) begin
         x_rel = (pix_x - x0) >> 1;
         y_rel = (pix_y - y0) >> 1;
-        row = glyph[y_rel];
-        glyph_active = row[7-x_rel];
+        row_bits = get_glyph_row(g_type, y_rel[2:0]);
+        glyph_active = row_bits[7-x_rel];
       end else begin
         glyph_active = 0;
       end
