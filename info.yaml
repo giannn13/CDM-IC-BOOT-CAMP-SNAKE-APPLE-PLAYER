@@ -27,9 +27,9 @@ pinout:
   ui[1]: ""
   ui[2]: ""
   ui[3]: ""
-  ui[4]: "Gamepad Latch"
-  ui[5]: "Gamepad Clock"
-  ui[6]: "Gamepad Data"
+  ui[4]: ""
+  ui[5]: ""
+  ui[6]: ""
   ui[7]: ""
 
   # Outputs
